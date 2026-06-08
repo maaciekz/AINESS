@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/Real Analyzer — przeglądarka wyników</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f8fa;
+    --surface-2: #eef0f4;
+    --border: #e2e4e9;
+    --border-strong: #c8ccd4;
+    --text: #1a1a2e;
+    --dim: #6b7280;
+    --dim-light: #9aa0a8;
+    --accent: #e0a530;
+    --accent-light: #f3d27d;
+    --blue: #2563eb;
+    --green: #16a34a;
+    --red: #dc2626;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  code, .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+  /* ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ */
+  header {
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+
+  .header-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  .brand .tag {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+
+  .brand h1 {
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .stats {
+    font-size: 13px;
+    color: var(--dim);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .stats strong { color: var(--text); font-weight: 500; }
+
+  /* ═══════════════════════════════════════════════════════════
+     BUTTONS
+     ═══════════════════════════════════════════════════════════ */
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 18px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.2px;
+  }
+
+  button:hover { border-color: var(--accent); color: var(--accent); background: var(--bg); }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+  button.primary {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  button.primary:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+  button.icon-btn {
+    padding: 8px 12px;
+    line-height: 1;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     EMPTY STATE
+     ═══════════════════════════════════════════════════════════ */
+  .empty-state {
+    max-width: 600px;
+    margin: 120px auto;
+    text-align: center;
+    padding: 0 32px;
+  }
+
+  .empty-state .tag {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 16px;
+  }
+
+  .empty-state h2 {
+    font-size: 36px;
+    font-weight: 300;
+    letter-spacing: -0.5px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .empty-state p {
+    color: var(--dim);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  .empty-state .instructions {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    margin: 32px 0;
+    font-size: 13px;
+    color: var(--dim);
+  }
+
+  .empty-state .instructions strong { color: var(--text); font-weight: 500; }
+
+  /* ═══════════════════════════════════════════════════════════
+     GALLERY VIEW
+     ═══════════════════════════════════════════════════════════ */
+  main {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 32px;
+  }
+
+  .view-title {
+    margin-bottom: 28px;
+  }
+
+  .view-title .tag {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+
+  .view-title h2 {
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-image {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--surface);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    backdrop-filter: blur(8px);
+  }
+  .card-badge.ai {
+    background: rgba(220, 38, 38, 0.92);
+    color: white;
+  }
+  .card-badge.real {
+    background: rgba(22, 163, 74, 0.92);
+    color: white;
+  }
+
+  .card-info {
+    padding: 14px 16px;
+  }
+
+  .card-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+    word-break: break-all;
+    margin-bottom: 4px;
+  }
+
+  .card-prob {
+    font-size: 11px;
+    color: var(--dim);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     DASHBOARD VIEW
+     ═══════════════════════════════════════════════════════════ */
+  .dashboard-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .back-button {
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--dim);
+    border-color: var(--border);
+  }
+
+  .dashboard-title {
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: -0.3px;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 500;
+  }
+
+  .panel-body {
+    padding: 20px;
+  }
+
+  .panel-body.no-pad { padding: 0; }
+
+  .panel-body img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* metadata table */
+  .metadata-table {
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .metadata-table dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 20px;
+  }
+
+  .metadata-table dt {
+    color: var(--dim);
+    font-weight: 400;
+    font-size: 12px;
+  }
+
+  .metadata-table dd {
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    word-break: break-all;
+  }
+
+  .metadata-section {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .metadata-section:first-child { border-top: none; }
+
+  .metadata-section-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim-light);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .diag-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .diag-badge.normal { background: rgba(22, 163, 74, 0.1); color: var(--green); }
+  .diag-badge.early_convergence { background: rgba(224, 165, 48, 0.15); color: var(--accent); }
+  .diag-badge.no_convergence { background: rgba(220, 38, 38, 0.1); color: var(--red); }
+  .diag-badge.failed_flip { background: rgba(220, 38, 38, 0.15); color: var(--red); }
+  .diag-badge.over_edit { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
+
+  /* ═══════════════════════════════════════════════════════════
+     ALPHA GALLERY
+     ═══════════════════════════════════════════════════════════ */
+  .alpha-section {
+    margin-top: 40px;
+  }
+
+  .alpha-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+  }
+
+  .alpha-header-text .tag {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 6px;
+    font-weight: 400;
+  }
+
+  .alpha-header-text h3 {
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: -0.3px;
+  }
+
+  .alpha-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .selection-count {
+    font-size: 13px;
+    color: var(--dim);
+  }
+
+  .alpha-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 1100px) {
+    .alpha-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .alpha-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+
+  .alpha-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+
+  .alpha-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(224, 165, 48, 0.2);
+  }
+
+  .alpha-card-image {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--surface);
+  }
+
+  .alpha-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .alpha-card-info {
+    padding: 10px 12px;
+  }
+
+  .alpha-label {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+  }
+
+  .alpha-prob {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .alpha-prob.high { color: var(--red); }
+  .alpha-prob.low { color: var(--green); }
+
+  .alpha-check {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .alpha-card.selected .alpha-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .alpha-card.selected .alpha-check::after {
+    content: '✓';
+    color: var(--bg);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     COMPARE MODAL
+     ═══════════════════════════════════════════════════════════ */
+  .compare-modal {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .compare-toolbar {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+  }
+
+  .compare-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .zoom-level {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--dim);
+    padding: 0 12px;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .compare-pair {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  .compare-side {
+    background: var(--surface);
+    overflow: auto;
+    position: relative;
+  }
+
+  .compare-side-label {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--dim);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .compare-side-label .prob-value { color: var(--text); font-weight: 500; }
+
+  .compare-img-wrapper {
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .compare-img {
+    max-width: 100%;
+    height: auto;
+    transform-origin: top center;
+    transition: transform 0.2s ease;
+  }
+
+  /* Klikalne obrazy w dashboard (XAI panel, difference) */
+  .zoomable-img {
+    cursor: zoom-in;
+    transition: opacity 0.15s ease;
+  }
+  .zoomable-img:hover {
+    opacity: 0.85;
+  }
+
+  /* Single-image zoom modal — używa stylu compare-modal ale z jedną stroną */
+  .single-zoom-container {
+    flex: 1;
+    overflow: auto;
+    background: var(--surface);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     LOADING
+     ═══════════════════════════════════════════════════════════ */
+  .loading {
+    text-align: center;
+    padding: 80px 32px;
+    color: var(--dim);
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="tag">AI Detection Research</div>
+      <h1>AI/Real Image Analyzer</h1>
+    </div>
+    <div class="header-actions">
+      <div class="stats hidden" id="stats">
+        <span><strong id="stats-total">0</strong> obrazów</span>
+        <span><strong id="stats-flipped">0</strong> flipped</span>
+        <span><strong id="stats-failed">0</strong> failed</span>
+      </div>
+      <button id="select-folder" class="primary">Wybierz folder</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- EMPTY STATE -->
+  <div id="empty-state" class="empty-state">
+    <div class="tag">Setup</div>
+    <h2>Wybierz folder z wynikami</h2>
+    <p>
+      Wybierz folder <code>ainess_output</code> wygenerowany przez notebook batch analysis.
+      Przeglądarka załaduje wszystkie podfoldery i pokaże je jako interaktywną galerię.
+    </p>
+    <div class="instructions">
+      <strong>Wymagania:</strong><br>
+      • Chrome, Edge lub Opera (obsługa File System Access API)<br>
+      • Folder z podfolderami zawierającymi <code>00_original_aiprob_XXXX.png</code>, <code>01_xai_panel.png</code>, <code>04_difference_x4.png</code>, klatki <code>alpha_X.XX_aiprob_YYYY.png</code> i <code>metadata.json</code>
+    </div>
+    <button id="select-folder-cta" class="primary">Otwórz folder</button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading" class="loading hidden">
+    <div class="loading-spinner"></div>
+    <div>Ładuję foldery i obrazy...</div>
+    <div id="loading-progress" class="mono" style="margin-top:8px; font-size:12px; color: var(--dim-light);"></div>
+  </div>
+
+  <!-- GALLERY VIEW -->
+  <section id="gallery-view" class="hidden">
+    <div class="view-title">
+      <div class="tag">Galeria wyników</div>
+      <h2>Wszystkie obrazy</h2>
+    </div>
+    <div id="cards-grid" class="cards-grid"></div>
+  </section>
+
+  <!-- DASHBOARD VIEW -->
+  <section id="dashboard-view" class="hidden">
+    <div class="dashboard-header">
+      <button class="back-button" id="back-to-gallery">← Powrót do galerii</button>
+      <div>
+        <div class="tag" style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--dim);">Analiza obrazu</div>
+        <div class="dashboard-title" id="dashboard-title"></div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- LEFT: original + metadata (wyniki + diagnoza) -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Oryginalne zdjęcie + metadata</div>
+        </div>
+        <div class="panel-body no-pad">
+          <img id="dash-original" alt="Original">
+          <div id="dash-metadata-left"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: xai panel + difference + metadata (GD + parametry) -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">XAI panel + różnica</div>
+        </div>
+        <div class="panel-body no-pad">
+          <img id="dash-xai" class="zoomable-img" alt="XAI panel" title="Kliknij aby powiększyć">
+          <div style="border-top: 1px solid var(--border);">
+            <img id="dash-diff" class="zoomable-img" alt="Difference" title="Kliknij aby powiększyć">
+          </div>
+          <div id="dash-metadata-right"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALPHA GALLERY -->
+    <div class="alpha-section">
+      <div class="alpha-header">
+        <div class="alpha-header-text">
+          <div class="tag">Interpolacja AI → Real</div>
+          <h3>10 klatek przejścia</h3>
+        </div>
+        <div class="alpha-header-actions">
+          <span class="selection-count" id="selection-count">Wybrano: 0/2</span>
+          <button id="compare-btn" disabled>Porównaj wybrane</button>
+        </div>
+      </div>
+      <div id="alpha-grid" class="alpha-grid"></div>
+    </div>
+  </section>
+</main>
+
+<!-- COMPARE MODAL -->
+<div id="compare-modal" class="compare-modal hidden">
+  <div class="compare-toolbar">
+    <div>
+      <span class="tag" style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--dim); margin-right:12px;">Porównanie</span>
+      <span style="font-size:14px; color:var(--text);" id="compare-title"></span>
+    </div>
+    <div class="compare-tools">
+      <button class="icon-btn" id="zoom-out">−</button>
+      <span class="zoom-level" id="zoom-level">100%</span>
+      <button class="icon-btn" id="zoom-in">+</button>
+      <button class="icon-btn" id="zoom-reset">Reset</button>
+      <button id="close-compare">Zamknij</button>
+    </div>
+  </div>
+  <div class="compare-pair">
+    <div class="compare-side" id="compare-left-side">
+      <div class="compare-side-label">
+        <span id="compare-left-label">α = -</span>
+        <span>P(AI) = <span class="prob-value" id="compare-left-prob">-</span></span>
+      </div>
+      <div class="compare-img-wrapper">
+        <img id="compare-left" class="compare-img" alt="Compare left">
+      </div>
+    </div>
+    <div class="compare-side" id="compare-right-side">
+      <div class="compare-side-label">
+        <span id="compare-right-label">α = -</span>
+        <span>P(AI) = <span class="prob-value" id="compare-right-prob">-</span></span>
+      </div>
+      <div class="compare-img-wrapper">
+        <img id="compare-right" class="compare-img" alt="Compare right">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SINGLE IMAGE ZOOM MODAL (XAI panel / Difference) -->
+<div id="single-zoom-modal" class="compare-modal hidden">
+  <div class="compare-toolbar">
+    <div>
+      <span class="tag" style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--dim); margin-right:12px;">Powiększenie</span>
+      <span style="font-size:14px; color:var(--text);" id="single-zoom-title"></span>
+    </div>
+    <div class="compare-tools">
+      <button class="icon-btn" id="single-zoom-out">−</button>
+      <span class="zoom-level" id="single-zoom-level">100%</span>
+      <button class="icon-btn" id="single-zoom-in">+</button>
+      <button class="icon-btn" id="single-zoom-reset">Reset</button>
+      <button id="close-single-zoom">Zamknij (Esc)</button>
+    </div>
+  </div>
+  <div class="single-zoom-container" id="single-zoom-container">
+    <div class="compare-img-wrapper">
+      <img id="single-zoom-img" class="compare-img" alt="Zoomed image">
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let folders = [];
+let currentFolder = null;
+let selectedForCompare = [];
+let zoomLevel = 1.0;
+
+// ═══════════════════════════════════════════════════════════
+// FOLDER LOADING (File System Access API)
+// ═══════════════════════════════════════════════════════════
+async function selectFolder() {
+  if (!window.showDirectoryPicker) {
+    alert('Twoja przeglądarka nie obsługuje wyboru folderu. Użyj Chrome, Edge lub Opera.');
+    return;
+  }
+
+  try {
+    const dirHandle = await window.showDirectoryPicker();
+    showLoading();
+    folders = [];
+
+    const allDirs = [];
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'directory') {
+        allDirs.push(entry);
+      }
+    }
+
+    const progressEl = document.getElementById('loading-progress');
+    let processed = 0;
+
+    for (const dirEntry of allDirs) {
+      progressEl.textContent = `${processed}/${allDirs.length} folderów`;
+      try {
+        const folder = await processFolder(dirEntry);
+        if (folder.original) {
+          folders.push(folder);
+        }
+      } catch (e) {
+        console.warn(`Skipped folder ${dirEntry.name}:`, e);
+      }
+      processed++;
+    }
+
+    folders.sort((a, b) => a.name.localeCompare(b.name));
+    showGallery();
+  } catch (e) {
+    if (e.name !== 'AbortError') {
+      console.error(e);
+      alert('Błąd: ' + e.message);
+    }
+    showEmpty();
+  }
+}
+
+async function processFolder(dirHandle) {
+  const folder = {
+    name: dirHandle.name,
+    original: null,
+    originalProb: null,
+    xaiPanel: null,
+    difference: null,
+    alphas: [],
+    metadata: null,
+  };
+
+  for await (const entry of dirHandle.values()) {
+    if (entry.kind !== 'file') continue;
+    const file = await entry.getFile();
+    const name = entry.name;
+
+    if (name.startsWith('00_original_aiprob_')) {
+      folder.original = URL.createObjectURL(file);
+      const m = name.match(/aiprob_(\d+)/);
+      if (m) folder.originalProb = parseInt(m[1]) / 1000;
+    } else if (name === '01_xai_panel.png') {
+      folder.xaiPanel = URL.createObjectURL(file);
+    } else if (name === '04_difference_x4.png') {
+      folder.difference = URL.createObjectURL(file);
+    } else if (name.startsWith('alpha_')) {
+      const m = name.match(/alpha_([\d.]+)_aiprob_(\d+)/);
+      if (m) {
+        folder.alphas.push({
+          alpha: parseFloat(m[1]),
+          prob: parseInt(m[2]) / 1000,
+          url: URL.createObjectURL(file),
+          name: name,
+        });
+      }
+    } else if (name === 'metadata.json') {
+      try {
+        const text = await file.text();
+        folder.metadata = JSON.parse(text);
+      } catch (e) {
+        console.warn(`Bad metadata for ${dirHandle.name}`);
+      }
+    }
+  }
+
+  folder.alphas.sort((a, b) => a.alpha - b.alpha);
+  return folder;
+}
+
+// ═══════════════════════════════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════════════════════════════
+function showEmpty() {
+  document.getElementById('empty-state').classList.remove('hidden');
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('gallery-view').classList.add('hidden');
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('stats').classList.add('hidden');
+}
+
+function showLoading() {
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('gallery-view').classList.add('hidden');
+  document.getElementById('dashboard-view').classList.add('hidden');
+}
+
+function showGallery() {
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('gallery-view').classList.remove('hidden');
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('stats').classList.remove('hidden');
+
+  updateStats();
+  renderGallery();
+}
+
+function showDashboard(folder) {
+  currentFolder = folder;
+  selectedForCompare = [];
+  zoomLevel = 1.0;
+
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('gallery-view').classList.add('hidden');
+  document.getElementById('dashboard-view').classList.remove('hidden');
+
+  renderDashboard();
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════════
+// GALLERY RENDER
+// ═══════════════════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('stats-total').textContent = folders.length;
+  
+  let flipped = 0, failed = 0;
+  for (const f of folders) {
+    const finalProb = f.metadata?.results?.prob_ai_at_alpha_1 ?? f.metadata?.results?.final_prob_in_gd;
+    if (finalProb !== undefined) {
+      if (finalProb < 0.5) flipped++;
+      else failed++;
+    }
+  }
+  document.getElementById('stats-flipped').textContent = flipped;
+  document.getElementById('stats-failed').textContent = failed;
+}
+
+function renderGallery() {
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+
+  for (const folder of folders) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.onclick = () => showDashboard(folder);
+
+    const prob = folder.originalProb ?? 0;
+    const isAI = prob > 0.5;
+
+    card.innerHTML = `
+      <div class="card-image">
+        <img src="${folder.original}" alt="${folder.name}" loading="lazy">
+        <div class="card-badge ${isAI ? 'ai' : 'real'}">${isAI ? 'AI' : 'Real'}</div>
+      </div>
+      <div class="card-info">
+        <div class="card-name">${folder.name}</div>
+        <div class="card-prob">P(AI) = ${prob.toFixed(3)}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD RENDER
+// ═══════════════════════════════════════════════════════════
+function renderDashboard() {
+  const f = currentFolder;
+  document.getElementById('dashboard-title').textContent = f.name;
+  document.getElementById('dash-original').src = f.original || '';
+  document.getElementById('dash-xai').src = f.xaiPanel || '';
+  document.getElementById('dash-diff').src = f.difference || '';
+  
+  renderMetadata();
+  renderAlphaGrid();
+  updateSelectionCount();
+}
+
+function renderMetadata() {
+  const f = currentFolder;
+  const leftContainer = document.getElementById('dash-metadata-left');
+  const rightContainer = document.getElementById('dash-metadata-right');
+  
+  if (!f.metadata) {
+    leftContainer.innerHTML = '<div class="metadata-section"><div style="color:var(--dim); font-size:13px;">Brak metadata.json</div></div>';
+    rightContainer.innerHTML = '';
+    return;
+  }
+
+  const m = f.metadata;
+  const r = m.results || {};
+  const p = m.parameters || {};
+  const diag = r.convergence_diagnosis || {};
+
+  const fmt = (v) => v === undefined || v === null ? '-' : (typeof v === 'number' ? v.toFixed(4) : String(v));
+  const fmtInt = (v) => v === undefined || v === null ? '-' : String(v);
+
+  // LEFT: Wyniki + Diagnoza (z oryginalnym obrazem powyżej)
+  leftContainer.innerHTML = `
+    <div class="metadata-section">
+      <div class="metadata-section-title">Wyniki klasyfikacji</div>
+      <div class="metadata-table">
+        <dl>
+          <dt>P(AI) oryginał (TF)</dt><dd>${fmt(r.prob_ai_tf_classifier)}</dd>
+          <dt>P(AI) α=0.00</dt><dd>${fmt(r.prob_ai_at_alpha_0)}</dd>
+          <dt>P(AI) α=1.00</dt><dd>${fmt(r.prob_ai_at_alpha_1)}</dd>
+          <dt>SSIM (α=0 vs α=1)</dt><dd>${fmt(r.ssim_alpha_0_vs_alpha_1)}</dd>
+        </dl>
+      </div>
+    </div>
+
+    ${diag.category ? `
+    <div class="metadata-section">
+      <div class="metadata-section-title">Diagnoza konwergencji</div>
+      <div style="margin-bottom:10px;">
+        <span class="diag-badge ${diag.category}">${diag.category}</span>
+      </div>
+      ${diag.description ? `<div style="font-size:12px; color:var(--dim); margin-bottom:8px;">${diag.description}</div>` : ''}
+      ${diag.recommendation ? `<div style="font-size:11px; color:var(--dim-light); font-style:italic;">→ ${diag.recommendation}</div>` : ''}
+    </div>
+    ` : ''}
+  `;
+
+  // RIGHT: GD + Parametry (pod obrazami XAI/diff)
+  rightContainer.innerHTML = `
+    <div class="metadata-section">
+      <div class="metadata-section-title">Gradient descent</div>
+      <div class="metadata-table">
+        <dl>
+          <dt>Kroki użyte</dt><dd>${fmtInt(r.gd_steps_used)} / ${fmtInt(p.gd_steps_max)}</dd>
+          <dt>P(AI) początkowe</dt><dd>${fmt(r.initial_prob_in_gd)}</dd>
+          <dt>P(AI) końcowe</dt><dd>${fmt(r.final_prob_in_gd)}</dd>
+          <dt>Czas przetwarzania</dt><dd>${m.processing_time_seconds ? m.processing_time_seconds.toFixed(1) + ' s' : '-'}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="metadata-section">
+      <div class="metadata-section-title">Parametry</div>
+      <div class="metadata-table">
+        <dl>
+          <dt>Edit resolution</dt><dd>${fmtInt(p.edit_resolution)}</dd>
+          <dt>Learning rate</dt><dd>${fmt(p.gd_lr)}</dd>
+          <dt>Lambda reg</dt><dd>${fmt(p.gd_lambda_reg)}</dd>
+          <dt>Target P(Real)</dt><dd>${fmt(p.target_prob_real)}</dd>
+        </dl>
+      </div>
+    </div>
+  `;
+}
+
+function renderAlphaGrid() {
+  const grid = document.getElementById('alpha-grid');
+  grid.innerHTML = '';
+
+  currentFolder.alphas.forEach((a, idx) => {
+    const card = document.createElement('div');
+    card.className = 'alpha-card';
+    card.dataset.idx = idx;
+    
+    const probClass = a.prob > 0.5 ? 'high' : 'low';
+
+    card.innerHTML = `
+      <div class="alpha-check"></div>
+      <div class="alpha-card-image">
+        <img src="${a.url}" alt="alpha ${a.alpha}" loading="lazy">
+      </div>
+      <div class="alpha-card-info">
+        <div class="alpha-label">α = ${a.alpha.toFixed(2)}</div>
+        <div class="alpha-prob ${probClass}">P(AI) = ${a.prob.toFixed(3)}</div>
+      </div>
+    `;
+
+    card.onclick = () => toggleAlphaSelection(idx);
+    grid.appendChild(card);
+  });
+}
+
+function toggleAlphaSelection(idx) {
+  const card = document.querySelector(`.alpha-card[data-idx="${idx}"]`);
+  const existingIdx = selectedForCompare.indexOf(idx);
+
+  if (existingIdx !== -1) {
+    selectedForCompare.splice(existingIdx, 1);
+    card.classList.remove('selected');
+  } else {
+    if (selectedForCompare.length >= 2) {
+      // Wyrzuć najstarszy wybór
+      const oldIdx = selectedForCompare.shift();
+      document.querySelector(`.alpha-card[data-idx="${oldIdx}"]`).classList.remove('selected');
+    }
+    selectedForCompare.push(idx);
+    card.classList.add('selected');
+  }
+
+  updateSelectionCount();
+}
+
+function updateSelectionCount() {
+  document.getElementById('selection-count').textContent = `Wybrano: ${selectedForCompare.length}/2`;
+  document.getElementById('compare-btn').disabled = selectedForCompare.length !== 2;
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMPARE MODAL
+// ═══════════════════════════════════════════════════════════
+function openCompare() {
+  if (selectedForCompare.length !== 2) return;
+
+  const [a, b] = selectedForCompare
+    .map(i => currentFolder.alphas[i])
+    .sort((x, y) => x.alpha - y.alpha);
+
+  document.getElementById('compare-title').textContent = currentFolder.name;
+  document.getElementById('compare-left').src = a.url;
+  document.getElementById('compare-right').src = b.url;
+  document.getElementById('compare-left-label').textContent = `α = ${a.alpha.toFixed(2)}`;
+  document.getElementById('compare-right-label').textContent = `α = ${b.alpha.toFixed(2)}`;
+  document.getElementById('compare-left-prob').textContent = a.prob.toFixed(3);
+  document.getElementById('compare-right-prob').textContent = b.prob.toFixed(3);
+
+  zoomLevel = 1.0;
+  updateZoom();
+
+  document.getElementById('compare-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCompare() {
+  document.getElementById('compare-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function updateZoom() {
+  const imgs = document.querySelectorAll('.compare-img');
+  imgs.forEach(img => {
+    img.style.transform = `scale(${zoomLevel})`;
+  });
+  document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
+}
+
+function zoomIn() {
+  zoomLevel = Math.min(zoomLevel * 1.25, 6);
+  updateZoom();
+}
+
+function zoomOut() {
+  zoomLevel = Math.max(zoomLevel / 1.25, 0.25);
+  updateZoom();
+}
+
+function zoomReset() {
+  zoomLevel = 1.0;
+  updateZoom();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SINGLE IMAGE ZOOM MODAL (dla XAI / Difference w dashboard)
+// ═══════════════════════════════════════════════════════════
+let singleZoomLevel = 1.0;
+
+function openSingleZoom(imgSrc, title) {
+  document.getElementById('single-zoom-img').src = imgSrc;
+  document.getElementById('single-zoom-title').textContent = title;
+  singleZoomLevel = 1.0;
+  updateSingleZoom();
+  document.getElementById('single-zoom-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSingleZoom() {
+  document.getElementById('single-zoom-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function updateSingleZoom() {
+  const img = document.getElementById('single-zoom-img');
+  img.style.transform = `scale(${singleZoomLevel})`;
+  document.getElementById('single-zoom-level').textContent = Math.round(singleZoomLevel * 100) + '%';
+}
+
+function singleZoomIn() {
+  singleZoomLevel = Math.min(singleZoomLevel * 1.25, 6);
+  updateSingleZoom();
+}
+
+function singleZoomOut() {
+  singleZoomLevel = Math.max(singleZoomLevel / 1.25, 0.25);
+  updateSingleZoom();
+}
+
+function singleZoomReset() {
+  singleZoomLevel = 1.0;
+  updateSingleZoom();
+}
+
+// ═══════════════════════════════════════════════════════════
+// EVENT BINDINGS
+// ═══════════════════════════════════════════════════════════
+document.getElementById('select-folder').addEventListener('click', selectFolder);
+document.getElementById('select-folder-cta').addEventListener('click', selectFolder);
+document.getElementById('back-to-gallery').addEventListener('click', showGallery);
+document.getElementById('compare-btn').addEventListener('click', openCompare);
+document.getElementById('close-compare').addEventListener('click', closeCompare);
+document.getElementById('zoom-in').addEventListener('click', zoomIn);
+document.getElementById('zoom-out').addEventListener('click', zoomOut);
+document.getElementById('zoom-reset').addEventListener('click', zoomReset);
+
+// Single-zoom modal (XAI panel, difference)
+document.getElementById('close-single-zoom').addEventListener('click', closeSingleZoom);
+document.getElementById('single-zoom-in').addEventListener('click', singleZoomIn);
+document.getElementById('single-zoom-out').addEventListener('click', singleZoomOut);
+document.getElementById('single-zoom-reset').addEventListener('click', singleZoomReset);
+
+// Klik na XAI panel i difference w dashboard → otwórz powiększenie
+document.getElementById('dash-xai').addEventListener('click', () => {
+  if (currentFolder?.xaiPanel) {
+    openSingleZoom(currentFolder.xaiPanel, `${currentFolder.name} — XAI panel`);
+  }
+});
+document.getElementById('dash-diff').addEventListener('click', () => {
+  if (currentFolder?.difference) {
+    openSingleZoom(currentFolder.difference, `${currentFolder.name} — Difference`);
+  }
+});
+
+// Esc: zamyka aktywny modal (jeden lub drugi)
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (!document.getElementById('compare-modal').classList.contains('hidden')) {
+    closeCompare();
+  } else if (!document.getElementById('single-zoom-modal').classList.contains('hidden')) {
+    closeSingleZoom();
+  }
+});
+
+// Mouse wheel zoom (Ctrl/Cmd) — działa w obu modalach
+document.getElementById('compare-modal').addEventListener('wheel', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    if (e.deltaY < 0) zoomIn();
+    else zoomOut();
+  }
+}, { passive: false });
+
+document.getElementById('single-zoom-modal').addEventListener('wheel', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    if (e.deltaY < 0) singleZoomIn();
+    else singleZoomOut();
+  }
+}, { passive: false });
+
+</script>
+</body>
+</html>
