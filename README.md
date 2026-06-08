@@ -132,6 +132,48 @@ Cała pętla przesuwa **pojedynczy wektor `z`** w 4096-wymiarowej przestrzeni la
 
 **Po zakończeniu.** Mamy nowy wektor `z_final`, przesunięty względem `z_0`, ale wciąż blisko niego (dzięki kotwicy regularyzacyjnej). Wagi obu modeli są dokładnie takie same jak na początku. Klasyfikator niczego się nie nauczył. To my przemieściliśmy się w przestrzeni.
 
+**alpha_0.00**
+
+<img width="768" height="768" alt="alpha_0 22_aiprob_0022" src="https://github.com/user-attachments/assets/da03f6ac-8489-41cb-9142-da57cc5869f2" />
+
+**alpha_0.11**
+
+<img width="768" height="768" alt="alpha_0 00_aiprob_0783" src="https://github.com/user-attachments/assets/880d357e-7cb7-46fa-b142-d71d77cf1b73" />
+
+**alpha_0.22**
+
+<img width="768" height="768" alt="alpha_0 22_aiprob_0022" src="https://github.com/user-attachments/assets/422d66bf-33e1-4e2d-8886-f788fea0f1fe" />
+
+**alpha_0.33**
+
+<img width="768" height="768" alt="alpha_0 33_aiprob_0006" src="https://github.com/user-attachments/assets/25780525-3f56-4aeb-9da8-537a78e7a860" />
+
+**alpha_0.44**
+
+<img width="768" height="768" alt="alpha_0 44_aiprob_0002" src="https://github.com/user-attachments/assets/b186ba2e-3cf9-4acf-94e1-d6f29d94cf89" />
+
+**alpha_0.56**
+
+<img width="768" height="768" alt="alpha_0 56_aiprob_0001" src="https://github.com/user-attachments/assets/fdff7051-d6da-407c-8881-e497ca850684" />
+
+**alpha_0.67**
+
+<img width="768" height="768" alt="alpha_0 67_aiprob_0000" src="https://github.com/user-attachments/assets/45bcd93e-4e78-464c-80a6-6dfa44a14694" />
+
+**alpha_0.78**
+
+<img width="768" height="768" alt="alpha_0 78_aiprob_0000" src="https://github.com/user-attachments/assets/34d81644-07d3-4a61-a98a-46b5adb02638" />
+
+**alpha_0.89**
+
+<img width="768" height="768" alt="alpha_0 89_aiprob_0000" src="https://github.com/user-attachments/assets/ddb8610c-1808-469b-877c-b784d64f331d" />
+
+
+**alpha_1.00**
+
+<img width="768" height="768" alt="alpha_1 00_aiprob_0000" src="https://github.com/user-attachments/assets/592f2dec-7352-4cd1-97ff-12d8f38e1cc5" />
+
+
 ## Dlaczego to nie jest trening
 
 Klasyczny trening sieci uczy *wag modelu*. Szuka uniwersalnej funkcji, która dla każdego obrazu zwróci sensowną predykcję. Optymalizuje miliony parametrów. Trwa godziny.
@@ -450,6 +492,47 @@ The entire loop moves a **single vector `z`** through the 4096-dimensional laten
 **What happens to `z` along the way.** At the start, `z` is an AI image in the latent. After the first iteration, the 4096 numbers shift slightly. The decoded image is *almost* identical, but `prob_AI` has dropped a little. After the second iteration, they shift again. For Stable Diffusion and Midjourney images, **2 to 3 iterations** are enough for `prob_AI` to fall below 0.1. The classifier changes its mind from "AI" to "Real". For DALL-E even 80 iterations are not enough; its images sit too far from the decision boundary.
 
 **After the loop.** We have a new vector `z_final`, shifted relative to `z_0` but still close to it (thanks to the regularization anchor). The weights of both models are exactly the same as at the start. The classifier has not learned anything. We are the ones who moved through the space.
+
+**alpha_0.00**
+
+<img width="768" height="768" alt="alpha_0 22_aiprob_0022" src="https://github.com/user-attachments/assets/da03f6ac-8489-41cb-9142-da57cc5869f2" />
+
+**alpha_0.11**
+
+<img width="768" height="768" alt="alpha_0 00_aiprob_0783" src="https://github.com/user-attachments/assets/880d357e-7cb7-46fa-b142-d71d77cf1b73" />
+
+**alpha_0.22**
+
+<img width="768" height="768" alt="alpha_0 22_aiprob_0022" src="https://github.com/user-attachments/assets/422d66bf-33e1-4e2d-8886-f788fea0f1fe" />
+
+**alpha_0.33**
+
+<img width="768" height="768" alt="alpha_0 33_aiprob_0006" src="https://github.com/user-attachments/assets/25780525-3f56-4aeb-9da8-537a78e7a860" />
+
+**alpha_0.44**
+
+<img width="768" height="768" alt="alpha_0 44_aiprob_0002" src="https://github.com/user-attachments/assets/b186ba2e-3cf9-4acf-94e1-d6f29d94cf89" />
+
+**alpha_0.56**
+
+<img width="768" height="768" alt="alpha_0 56_aiprob_0001" src="https://github.com/user-attachments/assets/fdff7051-d6da-407c-8881-e497ca850684" />
+
+**alpha_0.67**
+
+<img width="768" height="768" alt="alpha_0 67_aiprob_0000" src="https://github.com/user-attachments/assets/45bcd93e-4e78-464c-80a6-6dfa44a14694" />
+
+**alpha_0.78**
+
+<img width="768" height="768" alt="alpha_0 78_aiprob_0000" src="https://github.com/user-attachments/assets/34d81644-07d3-4a61-a98a-46b5adb02638" />
+
+**alpha_0.89**
+
+<img width="768" height="768" alt="alpha_0 89_aiprob_0000" src="https://github.com/user-attachments/assets/ddb8610c-1808-469b-877c-b784d64f331d" />
+
+
+**alpha_1.00**
+
+<img width="768" height="768" alt="alpha_1 00_aiprob_0000" src="https://github.com/user-attachments/assets/592f2dec-7352-4cd1-97ff-12d8f38e1cc5" />
 
 ## Why this is not training
 
