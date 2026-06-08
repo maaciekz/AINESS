@@ -190,13 +190,30 @@ Analiza wygenerowanych przejść i map Grad-CAM pokazała, że klasyfikator wraz
 
 1. **Kolor skóry** – odcień i jego rozkład na twarzy
    
-![Uploading image.png…]()
- 
-3. **Zmarszczki** – obecność i geometria drobnych zmarszczek mimicznych
-4. **Szum** – mikro-tekstura tła i powierzchni
-5. **Światło** – kierunek i miękkość oświetlenia
-6. **Nieostrość** – nieostrość w miejscach, gdzie nie powinno jej być
-7. **Włosy** – tekstura, połysk, pojedyncze pasma
+<img width="1223" height="590" alt="image" src="https://github.com/user-attachments/assets/a3c2ea83-6c60-49fa-b967-736cb1b32e4b" />
+
+
+2. **Zmarszczki** – obecność i geometria drobnych zmarszczek mimicznych
+   
+   <img width="1464" height="650" alt="image" src="https://github.com/user-attachments/assets/0278737f-2d32-4aed-a208-932151dec84f" />
+
+3. **Szum** – mikro-tekstura tła i powierzchni
+   
+   <img width="1416" height="663" alt="image" src="https://github.com/user-attachments/assets/45029cee-7ef3-403d-8c2b-7465cbfbfc26" />
+
+4. **Światło** – kierunek i miękkość oświetlenia
+
+   <img width="1414" height="672" alt="image" src="https://github.com/user-attachments/assets/17dc6dae-ca59-4ea3-9180-1d56e5c55679" />
+
+5. **Nieostrość** – nieostrość w miejscach, gdzie nie powinno jej być
+
+   <img width="1424" height="665" alt="image" src="https://github.com/user-attachments/assets/713f15e5-5e0a-477c-8185-64dca9904e0f" />
+
+   
+6. **Włosy** – tekstura, połysk, pojedyncze pasma
+
+    <img width="1419" height="657" alt="image" src="https://github.com/user-attachments/assets/55d0bb9a-f4fd-4340-b21d-b3163961783f" />
+
 
 To są obszary, w których generatory AI zostawiają najwięcej śladów i które klasyfikator wykorzystuje, podejmując decyzję.
 
@@ -552,12 +569,26 @@ Three practical consequences follow. **Convergence is fast**: 2 to 3 iterations 
 Analysis of the generated transitions and the Grad-CAM maps revealed that the classifier together with SD-VAE consistently modifies a handful of specific image features:
 
 1. **Skin color** — the tone and how it is distributed across the face
-2. **Wrinkles** — the presence and geometry of small expression lines
-3. **Noise** — micro-texture of the background and surfaces
-4. **Light** — direction and softness of the lighting
-5. **Sharpness** — soft focus in places where it does not belong
-6. **Hair** — texture, gloss, individual strands
+   <img width="1223" height="590" alt="image" src="https://github.com/user-attachments/assets/a3c2ea83-6c60-49fa-b967-736cb1b32e4b" />
 
+2. **Wrinkles** — the presence and geometry of small expression lines
+
+   <img width="1464" height="650" alt="image" src="https://github.com/user-attachments/assets/0278737f-2d32-4aed-a208-932151dec84f" />
+   
+3. **Noise** — micro-texture of the background and surfaces
+   <img width="1416" height="663" alt="image" src="https://github.com/user-attachments/assets/45029cee-7ef3-403d-8c2b-7465cbfbfc26" />
+   
+4. **Light** — direction and softness of the lighting
+   <img width="1414" height="672" alt="image" src="https://github.com/user-attachments/assets/17dc6dae-ca59-4ea3-9180-1d56e5c55679" />
+5. **Sharpness** — soft focus in places where it does not belong
+
+   <img width="1424" height="665" alt="image" src="https://github.com/user-attachments/assets/713f15e5-5e0a-477c-8185-64dca9904e0f" />
+   
+7. **Hair** — texture, gloss, individual strands
+
+   <img width="1419" height="657" alt="image" src="https://github.com/user-attachments/assets/55d0bb9a-f4fd-4340-b21d-b3163961783f" />     
+
+   
 These are the areas where AI generators leave the most traces, and the ones the classifier draws on when making its decision.
 
 ## Conclusion
