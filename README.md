@@ -189,11 +189,14 @@ Stąd trzy praktyczne konsekwencje. **Konwergencja jest szybka**: 2 do 3 iteracj
 Analiza wygenerowanych przejść i map Grad-CAM pokazała, że klasyfikator wraz z SD-VAE konsekwentnie modyfikuje kilka konkretnych cech obrazu:
 
 1. **Kolor skóry** – odcień i jego rozkład na twarzy
-2. **Zmarszczki** – obecność i geometria drobnych zmarszczek mimicznych
-3. **Szum** – mikro-tekstura tła i powierzchni
-4. **Światło** – kierunek i miękkość oświetlenia
-5. **Nieostrość** – nieostrość w miejscach, gdzie nie powinno jej być
-6. **Włosy** – tekstura, połysk, pojedyncze pasma
+   
+![Uploading image.png…]()
+ 
+3. **Zmarszczki** – obecność i geometria drobnych zmarszczek mimicznych
+4. **Szum** – mikro-tekstura tła i powierzchni
+5. **Światło** – kierunek i miękkość oświetlenia
+6. **Nieostrość** – nieostrość w miejscach, gdzie nie powinno jej być
+7. **Włosy** – tekstura, połysk, pojedyncze pasma
 
 To są obszary, w których generatory AI zostawiają najwięcej śladów i które klasyfikator wykorzystuje, podejmując decyzję.
 
